@@ -1,0 +1,15 @@
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Shared.MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1, h2, h3" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(Shared.MainLayout)">
+            <div class="container py-5 text-center">
+                <h1 class="display-4 text-danger fw-bold">404</h1>
+                <p class="lead">The page or event resource you requested cannot be found.</p>
+                <a href="/events" class="btn btn-primary mt-2">Back to Events List</a>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>

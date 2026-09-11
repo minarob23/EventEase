@@ -1,0 +1,75 @@
+@page "/register/{Id:int}"
+@inject NavigationManager Navigation
+@inject AppStateService AppState
+@implements IDisposable
+
+<div class="container py-4">
+    <div class="card shadow-sm mx-auto" style="max-width: 520px;">
+        <div class="card-header bg-primary text-white">
+            <h4 class="card-title mb-0">Event Registration</h4>
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted">Registering for Event #<strong>@Id</strong></p>
+
+            @if (isAlreadyRegistered)
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>You have already registered for this event!
+                </div>
+                <button class="btn btn-secondary w-100" @onclick='() => Navigation.NavigateTo("/events")'>Return to Events</button>
+            }
+            else
+            {
+                <EditForm Model="@registrationModel" OnValidSubmit="HandleRegistration">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="alert alert-danger py-2 px-3 small" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Full Name</label>
+                        <InputText class="form-control" @bind-Value="registrationModel.FullName" placeholder="e.g. John Doe" />
+                        <ValidationMessage For="@(() => registrationModel.FullName)" class="text-danger small" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email Address</label>
+                        <InputText type="email" class="form-control" @bind-Value="registrationModel.Email" placeholder="e.g. john@example.com" />
+                        <ValidationMessage For="@(() => registrationModel.Email)" class="text-danger small" />
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-success flex-fill">Confirm Registration</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick='() => Navigation.NavigateTo("/events")'>Cancel</button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UserSession registrationModel = new();
+    private bool isAlreadyRegistered;
+
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        if (AppState.CurrentUser.IsAuthenticated)
+        {
+            registrationModel.FullName = AppState.CurrentUser.FullName;
+            registrationModel.Email = AppState.CurrentUser.Email;
+        }
+        isAlreadyRegistered = AppState.RegisteredEvents.Contains(Id);
+    }
+
+    private void HandleRegistration()
+    {
+        AppState.SetUser(registrationModel.FullName, registrationModel.Email);
+        AppState.RegisterForEvent(Id);
+        Navigation.NavigateTo("/events");
+    }
+
+    public void Dispose() => AppState.OnChange -= StateHasChanged;
+}

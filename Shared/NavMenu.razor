@@ -1,0 +1,34 @@
+@inject AppStateService AppState
+@implements IDisposable
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="events">
+            <i class="bi bi-calendar-event me-2"></i>EventEase
+        </a>
+        <div class="navbar-nav me-auto">
+            <NavLink class="nav-link" href="events" Match="NavLinkMatch.All">Events</NavLink>
+        </div>
+        <div>
+            @if (AppState.CurrentUser.IsAuthenticated)
+            {
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small text-light">
+                        <i class="bi bi-person-circle me-1"></i>@AppState.CurrentUser.FullName
+                    </span>
+                    <span class="badge bg-primary">@AppState.RegisteredEvents.Count Events</span>
+                    <button class="btn btn-outline-light btn-sm ms-2" @onclick="AppState.ClearUser">Logout</button>
+                </div>
+            }
+            else
+            {
+                <span class="small text-white-50">Guest Session</span>
+            }
+        </div>
+    </div>
+</nav>
+
+@code {
+    protected override void OnInitialized() => AppState.OnChange += StateHasChanged;
+    public void Dispose() => AppState.OnChange -= StateHasChanged;
+}

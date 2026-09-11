@@ -1,0 +1,61 @@
+@page "/events/{Id:int}"
+@inject NavigationManager Navigation
+@inject AppStateService AppState
+
+@if (currentEvent == null)
+{
+    <div class="alert alert-warning shadow-sm">
+        <h4 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Event Not Found</h4>
+        <p>No event exists with ID <strong>@Id</strong>, or the URL is invalid.</p>
+        <hr />
+        <button class="btn btn-outline-dark btn-sm" @onclick='() => Navigation.NavigateTo("/events")'>
+            Return to Events List
+        </button>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm p-4" style="max-width: 600px;">
+        <h3 class="text-primary">@currentEvent.Name</h3>
+        <p class="text-muted">Event ID: #@currentEvent.Id</p>
+        <p class="mb-1"><strong>Date:</strong> @currentEvent.Date.ToString("MMMM dd, yyyy")</p>
+        <p class="mb-3"><strong>Location:</strong> @currentEvent.Location</p>
+        <p class="mb-3"><strong>Confirmed Attendees:</strong> @AppState.GetAttendanceCount(currentEvent.Id)</p>
+
+        <div class="d-flex gap-2">
+            <a href="@($"/register/{currentEvent.Id}")" class="btn btn-primary">Proceed to Registration</a>
+            <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/events")'>Back to Events</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EventItem? currentEvent;
+
+    protected override void OnParametersSet()
+    {
+        if (Id <= 0 || Id > 150)
+        {
+            currentEvent = null;
+        }
+        else
+        {
+            currentEvent = new EventItem
+            {
+                Id = Id,
+                Name = Id switch
+                {
+                    1 => "Tech Innovation Summit",
+                    2 => "Corporate Leadership Workshop",
+                    3 => "Social Gala & Networking",
+                    _ => $"Event #{Id}: Industry Forum"
+                },
+                Date = DateTime.Today.AddDays(Id * 3),
+                Location = $"Hall {(char)('A' + (Id % 6))} - Cairo Conference Center"
+            };
+        }
+    }
+}
